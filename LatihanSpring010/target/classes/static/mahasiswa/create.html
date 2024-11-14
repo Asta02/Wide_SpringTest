@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tambah Mahasiswa Baru</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div style="text-align: center;">
+<h1>Tambah Mahasiswa Baru</h1>
+  <form action="/addMahasiswa" method="post">
+    <label for="nim">NIM:</label>
+    <input type="text" id="nim" name="nimMahasiswa" required><br><br>
+
+    <label for="nama">Nama:</label>
+    <input type="text" id="nama" name="namaMahasiswa" required><br><br>
+
+    <label for="tgl">Tanggal Lahir:</label>
+    <input type="date" id="tgl" name="tanggalLahir" required><br><br>
+
+    <label for="jk">Jenis Kelamin:</label>
+    <select id="jk" name="jenisKelamin" required>
+      <option value="">-- Pilih Jenis Kelamin --</option>
+      <option value="0">Laki-laki</option>
+      <option value="1">Perempuan</option>
+    </select><br><br>
+
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+      <option value="">-- Pilih Status --</option>
+      <option value="0">Aktif</option>
+      <option value="1">Tidak Aktif</option>
+    </select><br><br>
+
+    <input type="submit" value="Tambah">
+    <button type="button" onclick="cancelUpdate()">Batal</button>
+
+  </form>
+</div>
+  <script>
+    function cancelUpdate() {
+      // Redirect ke halaman "Read" jika pembatalan update
+      window.location.href = "/mahasiswa/index.html";
+    }
+  </script>
+</body>
+</html>

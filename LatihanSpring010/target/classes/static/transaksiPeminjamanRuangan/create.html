@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tambah Transaksi Peminjaman Ruangan Baru</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div style="text-align: center;">
+    <h1>Tambah Transaksi Peminjaman Ruangan Baru</h1>
+    <form action="/addPeminjaman" method="post">
+        <label for="idTransaksi">ID Transaksi:</label>
+        <input type="text" id="idTransaksi" name="idTransaksi" required readonly><br><br>
+
+        <label for="mahasiswa">Mahasiswa:</label>
+        <select id="mahasiswa" name="mahasiswa" required>
+        </select><br><br>
+
+        <label for="ruangan">Nama Ruangan:</label>
+        <input type="text" id="ruangan" name="ruangan" required><br><br>
+
+        <label for="tanggalAwal">Tanggal Awal:</label>
+        <input type="date" id="tanggalAwal" name="tanggalAwal" required><br><br>
+
+        <label for="tanggalAkhir">Tanggal Akhir:</label>
+        <input type="date" id="tanggalAkhir" name="tanggalAkhir" required><br><br>
+
+        <input type="submit" value="Tambah">
+        <button type="button" onclick="cancelUpdate()">Batal</button>
+
+    </form>
+
+    <script>
+        function cancelUpdate() {
+            // Redirect ke halaman "Read" jika pembatalan update
+            window.location.href = "/transaksiPeminjamanRuangan/index.html";
+        }
+
+        // Fungsi untuk mengambil data mahasiswa dari server menggunakan Ajax
+        function getMahasiswas() {
+            $.ajax({
+                url: '/getMahasiswas', // Ubah URL sesuai dengan endpoint untuk mengambil data mahasiswa di server
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Panggil fungsi untuk mengisi opsi dalam elemen select
+                    populateMahasiswaOptions(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Gagal mengambil data mahasiswa:', error);
+                }
+            });
+        }
+
+        // Fungsi untuk mengisi opsi dalam elemen select dengan data mahasiswa
+        function populateMahasiswaOptions(mahasiswas) {
+            var selectElement = $('#mahasiswa');
+            // Hapus opsi yang ada sebelumnya
+            selectElement.empty().append('<option value="">-- Pilih Mahasiswa --</option>');
+            // Tambahkan opsi baru untuk setiap mahasiswa
+            $.each(mahasiswas, function(index, mahasiswa) {
+                var optionElement = $('<option>').val(mahasiswa.nimMahasiswa).text(mahasiswa.namaMahasiswa);
+                selectElement.append(optionElement);
+            });
+        }
+
+        // Panggil fungsi getMahasiswas untuk mengambil data mahasiswa dari server saat halaman dimuat
+        $(document).ready(function() {
+            getMahasiswas();
+
+            $.ajax({
+                url: "/getTransaksiRuangans",
+                type: "GET",
+                success: function(data) {
+                    $("#idTransaksi").val(data.length + 1); // Menyimpan data ID otomatis ke dalam textbox
+                }
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

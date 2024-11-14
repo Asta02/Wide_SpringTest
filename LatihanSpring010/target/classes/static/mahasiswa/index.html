@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daftar Mahasiswa</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+    <a href="/"><- Menu Utama</a><br><br>
+    <a href="/mahasiswa/create.html">+ Tambah</a><br><br>
+    <div style="text-align: center;">
+        <h1>Daftar Mahasiswa</h1>
+    <table id="mahasiswaTable" style="margin:0 auto; border-color: black" border="1">
+        <thead>
+        <tr>
+            <th>NIM</th>
+            <th>Nama</th>
+            <th>Tanggal Lahir</th>
+            <th>Jenis Kelamin</th>
+            <th>Status</th>
+            <th>Aksi</th> <!-- Kolom aksi untuk update dan hapus -->
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p id="emptyMessage" style="display:none;">Tidak ada data mahasiswa.</p>
+    </div>
+    <script>
+        // Mengambil data mahasiswa dari REST API
+        $.ajax({
+            url: "/getMahasiswas",
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                if (data.length > 0) {
+                    // Menampilkan data mahasiswa ke dalam tabel
+                    var tableBody = $("#mahasiswaTable tbody");
+                    $.each(data, function(index, mahasiswa) {
+                        var row = $("<tr>");
+                        $("<td>").text(mahasiswa.nimMahasiswa).appendTo(row);
+                        $("<td>").text(mahasiswa.namaMahasiswa).appendTo(row);
+                        var tanggalLahir = new Date(mahasiswa.tanggalLahir);
+                        var bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                        var tanggal = tanggalLahir.getDate();
+                        var bulanIndex = tanggalLahir.getMonth();
+                        var tahun = tanggalLahir.getFullYear();
+
+                        var tanggalLahirFormatted = tanggal + " " + bulan[bulanIndex] + " " + tahun;
+
+                        $("<td>").text(tanggalLahirFormatted).appendTo(row);
+                        $("<td>").text(mahasiswa.jenisKelamin === 0 ? "Laki-Laki" : "Perempuan").appendTo(row);
+                        $("<td>").text(mahasiswa.status === 0 ? "Aktif" : "Tidak Aktif").appendTo(row);
+
+                        // Menambahkan tombol update dan hapus ke dalam kolom aksi
+                        var actionColumn = $("<td>");
+                        var updateButton = $("<button>").text("Update").attr("data-nim", mahasiswa.nimMahasiswa).appendTo(actionColumn);
+                        var deleteButton = $("<button>").text("Hapus").attr("data-nim", mahasiswa.nimMahasiswa).appendTo(actionColumn);
+                        actionColumn.appendTo(row);
+
+                        row.appendTo(tableBody);
+
+                        // Menambahkan event listener untuk tombol update dan hapus
+                        updateButton.on("click", function() {
+                            var nim = $(this).attr("data-nim");
+                            // Redirect ke halaman update dengan parameter NIM
+                            window.location.href = "/mahasiswa/update.html?nimMahasiswa=" + nim;
+                        });
+
+                        deleteButton.on("click", function() {
+                            var nim = $(this).attr("data-nim");
+                            var confirmDelete = confirm("Apakah Anda yakin ingin menghapus data mahasiswa ini?");
+                            if (confirmDelete) {
+                                // Menghapus data mahasiswa dengan REST API
+                                $.ajax({
+                                    url: "/deleteMahasiswa?nimMahasiswa=" + nim,
+                                    type: "DELETE",
+                                    success: function() {
+                                        // Refresh halaman setelah sukses hapus
+                                        location.reload();
+                                    },
+                                    error: function(jqXHR, textStatus, errorThrown) {
+                                        console.error("Error: " + textStatus, errorThrown);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    // Menampilkan pesan jika data kosong
+                    $("#emptyMessage").show();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error: " + textStatus, errorThrown);
+            }
+        });
+    </script>
+</body>
+</html>

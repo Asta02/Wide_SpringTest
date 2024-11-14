@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Update Mahasiswa</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div style="text-align: center;">
+  <h1>Update Mahasiswa</h1>
+  <form action="/updateMahasiswa" method="post">
+    <!-- tambahkan input field hidden untuk menandai metode PUT -->
+    <input type="hidden" name="_method" value="PUT">
+
+    <label for="nim">NIM:</label>
+    <input type="text" id="nim" name="nimMahasiswa" required readonly><br><br>
+
+    <label for="nama">Nama:</label>
+    <input type="text" id="nama" name="namaMahasiswa" required><br><br>
+
+    <label for="tgl">Tanggal Lahir:</label>
+    <input type="date" id="tgl" name="tanggalLahir" required><br><br>
+
+    <label for="jk">Jenis Kelamin:</label>
+    <select id="jk" name="jenisKelamin" required>
+      <option>-- Pilih Jenis Kelamin --</option>
+      <option value="0">Laki-laki</option>
+      <option value="1">Perempuan</option>
+    </select><br><br>
+
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+      <option>-- Pilih Status --</option>
+      <option value="0">Aktif</option>
+      <option value="1">Tidak Aktif</option>
+    </select><br><br>
+
+    <button type="submit">Update</button>
+    <button type="button" onclick="cancelUpdate()">Batal</button>
+  </form>
+  <script>
+    // Mengambil parameter NIM dari URL
+    var nim = getUrlParameter("nimMahasiswa");
+    if (nim) {
+      // Mengisi nilai pada form berdasarkan NIM
+      $.ajax({
+        url: "/getMahasiswa?nimMahasiswa=" + nim,
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+          if (data) {
+            $("#nim").val(data.nimMahasiswa);
+            $("#nama").val(data.namaMahasiswa);
+            var tanggalLahir = new Date(data.tanggalLahir);
+            var tahun = tanggalLahir.getFullYear();
+            var bulan = ("0" + (tanggalLahir.getMonth() + 1)).slice(-2);
+            var tanggal = ("0" + tanggalLahir.getDate()).slice(-2);
+            var tanggalLahirFormatted = tahun + "-" + bulan + "-" + tanggal;
+
+            $("#tgl").val(tanggalLahirFormatted);
+            $("#jk").val(data.jenisKelamin);
+            $("#status").val(data.status);
+          } else {
+            console.error("Data mahasiswa tidak ditemukan.");
+          }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error("Error: " + textStatus, errorThrown);
+        }
+      });
+    } else {
+      console.error("NIM mahasiswa tidak ditemukan.");
+    }
+
+    // Submit form update
+    $("#updateForm").on("submit", function(event) {
+      event.preventDefault();
+      var formData = $(this).serializeArray();
+      var updatedData = {};
+      $.each(formData, function(index, field) {
+        updatedData[field.name] = field.value;
+      });
+      // Mengupdate data mahasiswa dengan REST API
+      $.ajax({
+        url: "/updateMahasiswa",
+        type: "PUT",
+        data: updatedData,
+        success: function() {
+          // Redirect ke halaman "Read" setelah sukses update
+          window.location.href = "/mahasiswa/index.html";
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error("Error: " + textStatus, errorThrown);
+        }
+      });
+    });
+    // Fungsi untuk membatalkan update
+    function cancelUpdate() {
+      // Redirect ke halaman "Read" jika pembatalan update
+      window.location.href = "/mahasiswa/index.html";
+    }
+
+    // Fungsi untuk mengambil parameter dari URL
+    function getUrlParameter(parameterName) {
+      var result = null,
+              tmp = [];
+      location.search
+              .substr(1)
+              .split("&")
+              .forEach(function(item) {
+                tmp = item.split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+              });
+      return result;
+    }
+  </script>
+</div>
+</body>
+</html>
